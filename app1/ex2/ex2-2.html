@@ -1,74 +1,82 @@
-<!DOCTYPE html >
+<!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <title>JRostand stade reperes</title>
-    <link rel="stylesheet" type="text/css" href="./style.css" />
-</head>
-<body>
+  <head>
+    <title>Carte avec marqueurs autour du stade</title>
+    <meta charset="UTF-8" />
+    <style>
+      /* — CSS intégré — */
+      #map {
+        height: 100%;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .info-window {
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
 
-<h1>JRostand Reperes Stade</h1>
-<hr>
-<div id="map">...</div>
+    <script>
+      // Coordonnées du stade municipal (exemple)  
+      // Remplace par les vraies coordonnées
+      const stade = { lat: 48.95930033308523, lng: 2.5477890651742516 };
 
-<script   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7Y32T_PJHZxYcK3BJYJFNwSl6cuvLXpo&callback=initMap"></script>
-<script  src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
+      // Autour du stade : quelques points d’intérêt
+      const points = [
+        { name: "Entrée Nord", lat: 48.95997156116078, lng: 2.548567662388221 },
+        { name: "Entrée Sud", lat: 48.95901659236071, lng: 2.544364368005043 },
+        { name: "Parking Ouest", lat: 48.96083250510581, lng: 2.5428194730675138 },
+        { name: "Parking Est", lat: 48.96334006261106, lng: 2.5503223316267305 },
+        { name: "Rue proche", lat: 48.96146800531762, lng: 2.553135524155863 }
+      ];
 
-    // au chargement de la page
-    //window.onload = loadDoc();
-    // when page is ready, initialize the map!
-    google.maps.event.addDomListener(window, 'load', loadDoc());
-    var markers;
+      function initMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 16,
+          center: stade,
+        });
 
-    // Ajax avec JQuery
-    function loadDoc() {
-        $.ajax({
-                url: "markersJrostand.json",
-                method: "GET",
-                //data: { id : menuId },
-                dataType: "json",
-                success: function(dataMarkers){
-                            markers = dataMarkers;
-                            for(let i = 0; i < markers.length;i++){
-                                let marker = markers[i];
-                                for(key in markers[i]){
-                                    console.log(key + ":" + marker[key]);
-                                }
-                                console.log("____________");
-                            }
-                            initMap();
-                        }
-            }
-        );
-    }
+        // Marqueur du stade (point central)
+        new google.maps.Marker({
+          position: stade,
+          map,
+          title: "Stade municipal",
+          icon: {
+            url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+          },
+        });
 
-   function initMap(){
-       var options = {
-           center: new google.maps.LatLng(48.95930033308523, 2.5477890651742516),
-           zoom: 15,
-           mapTypeId: google.maps.MapTypeId.ROADMAP
-       };
+        // Ajoute les marqueurs autour
+        points.forEach((pt) => {
+          const marker = new google.maps.Marker({
+            position: { lat: pt.lat, lng: pt.lng },
+            map,
+            title: pt.name,
+          });
 
-       /*
-           Constructeur de la map qui prend en paramêtre le conteneur HTML
-           dans lequel la map doit s'afficher et les options
-       */
-       var map = new google.maps.Map(document.getElementById("map"), options);
+          const info = new google.maps.InfoWindow({
+            content: `<div class="info-window"><strong>${pt.name}</strong></div>`,
+          });
 
-       // On positionne les marqueurs sur la carte
-       for (let i = 0; i < markers.length; i++) {
-           let latlng = markers[i];
-           new google.maps.Marker({
-               position: latlng,
-               map : map
-           });
-       }
-    }
+          marker.addListener("click", () => {
+            info.open(map, marker);
+          });
+        });
+      }
 
+      window.initMap = initMap;
+    </script>
 
-</script>
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7Y32T_PJHZxYcK3BJYJFNwSl6cuvLXpo&callback=initMap&v=weekly"
+        defer
+    ></script>
 
-
-</body>
+  </body>
 </html>
