@@ -1,83 +1,89 @@
-<!DOCTYPE html >
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>JRostand stade reperes</title>
+    <title>JRostand Stade Reperes</title>
+    <style>
+        #map {
+            width: 100%;
+            height: 500px;
+        }
+        .info-content img {
+            width: 200px;
+            height: auto;
+            display: block;
+        }
+    </style>
 </head>
 <body>
 
 <h1>JRostand Reperes Stade</h1>
 <hr>
-<div id="map">...</div>
+<div id="map"></div>
 
-
-<script   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7Y32T_PJHZxYcK3BJYJFNwSl6cuvLXpo&callback=initMap"></script>
-<script  src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7Y32T_PJHZxYcK3BJYJFNwSl6cuvLXpo&callback=initMap" async defer></script>
 <script>
+    var map;
+    var markers = [
+        {
+            lat: -0.8037,
+            lng: 11.6094,
+            title: "Gabon",
+            image: "images/gabon-la-reserve-de-la-lope_db303d5c486910e4226a3eadda0889f479b60e4f.jpg",
+            desc:"Gabon... magnifique pays d'Afrique centrale"
+        },
+        {
+            lat: -0.6827,
+            lng: 73.2207,
+            title: "Maldives",
+            image: "images/maldive.jpg",
+            desc: "Les Maldives… un archipel paradisiaque,\n idéal pour la plongée et la détente sur des plages turquoise."
+        }
+    ];
 
-    // au chargement de la page
-    //window.onload = loadDoc();
-    // when page is ready, initialize the map!
-    google.maps.event.addDomListener(window, 'load', loadDoc());
-    var markers;
+    function initMap() {
+        // Centrer la map entre les deux lieux
+        map = new google.maps.Map(document.getElementById("map"), {
+            center: { lat: 0, lng: 20 },
+            zoom: 2,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
 
-    // Ajax avec JQuery
-    function loadDoc() {
-        $.ajax({
-                url: "markersJrostand.json",
-                method: "GET",
-                //data: { id : menuId },
-                dataType: "json",
-                success: function(dataMarkers){
-                            markers = dataMarkers;
-                            for(let i = 0; i < markers.length;i++){
-                                let marker = markers[i];
-                                for(key in markers[i]){
-                                    console.log(key + ":" + marker[key]);
-                                }
-                                console.log("____________");
-                            }
-                            initMap();
-                        }
-            }
-        );
+        // Créer un polyline entre les deux lieux
+        const flightPath = new google.maps.Polyline({
+            path: markers.map(m => ({ lat: m.lat, lng: m.lng })),
+            geodesic: true,
+            strokeColor: "#FF0000",
+            strokeOpacity: 1.0,
+            strokeWeight: 2
+        });
+        flightPath.setMap(map);
+
+        // Ajouter les markers avec infowindow
+        markers.forEach(function(m, i) {
+            const marker = new google.maps.Marker({
+                position: { lat: m.lat, lng: m.lng },
+                map: map,
+                title: m.title
+            });
+
+            const infoContent = `
+                <div class="info-content">
+                    <h3>${m.title}</h3>
+                    <p>${m.desc}</p>
+                    <img src="${m.image}" alt="${m.title}">
+                </div>
+            `;
+            const infoWindow = new google.maps.InfoWindow({
+                content: infoContent
+            });
+
+            marker.addListener('click', function() {
+                infoWindow.open(map, marker);
+            });
+        });
     }
-
-   function initMap(){
-       var options = {
-           center: new google.maps.LatLng(48.95930033308523, 2.5477890651742516),
-           zoom: 15,
-           mapTypeId: google.maps.MapTypeId.ROADMAP
-       };
-
-
-        /*****   Markers  *****/
-
-       var map = new google.maps.Map(document.getElementById("map"), options);
-
-       // On positionne les marqueurs sur la carte
-       for (let i = 0; i < markers.length; i++) {
-           let latlng = markers[i];
-           new google.maps.Marker({
-               position: latlng,
-               map : map
-           });
-       }
-
-       /**** Polylines *****/
-       const flightPath = new google.maps.Polyline({
-           path: markers,
-           geodesic: true,
-           strokeColor: "#FF0000",
-           strokeOpacity: 1.0,
-           strokeWeight: 2,
-       });
-       flightPath.setMap(map);
-    }
-
-
 </script>
-
 
 </body>
 </html>

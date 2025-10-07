@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>JRostand Stade Repères</title>
+  <link rel="stylesheet" type="text/css" href="./style.css" />
+  <style>
+    #map {
+      width: 100%;
+      height: 500px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>JRostand Repères Stade</h1>
+  <hr>
+  <div id="map"></div>
+
+  <!-- jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <!-- Google Maps -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7Y32T_PJHZxYcK3BJYJFNwSl6cuvLXpo&callback=loadDoc&v=weekly" defer></script>
+
+  <script>
+    var markers;
+    var map;
+
+    function loadDoc() {
+      // 1️⃣ Initialisation de la carte
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 48.9593, lng: 2.5477 },
+        zoom: 15,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+      });
+
+      // 2️⃣ Récupération du fichier JSON
+      $.ajax({
+        url: "markersJrostand.json",   // Fichier JSON
+        method: "GET",
+        dataType: "json",
+        success: function (dataMarkers) {
+          markers = dataMarkers;
+
+          // 3️⃣ Affichage dans la console (facultatif)
+          for (let i = 0; i < markers.length; i++) {
+            let markerData = markers[i];
+            for (let key in markerData) {
+              console.log(key + ": " + markerData[key]);
+            }
+            console.log("-------------");
+          }
+
+          // 4️⃣ Création des marqueurs sur la carte
+          for (let i = 0; i < markers.length; i++) {
+            let m = markers[i];
+            let marker = new google.maps.Marker({
+              position: { lat: m.lat, lng: m.lng },
+              map: map,
+              title: "Marqueur " + m.id
+            });
+
+            // ✅ Création de la fenêtre d'information
+            const infoContent = `
+              <div style="font-family: Arial; font-size: 14px;">
+                <b>Marqueur ID : ${m.id}</b><br>
+                Latitude : ${m.lat.toFixed(6)}<br>
+                Longitude : ${m.lng.toFixed(6)}
+              </div>
+            `;
+
+            const infoWindow = new google.maps.InfoWindow({
+              content: infoContent
+            });
+
+            // 🟢 Affiche l'infoWindow au clic
+            google.maps.event.addListener(marker, "click", function () {
+              infoWindow.open(map, marker);
+            });
+          }
+        },
+        error: function (err) {
+          console.error("Erreur lors du chargement des markers :", err);
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
